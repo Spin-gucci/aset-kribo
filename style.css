@@ -1,0 +1,123 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    background: radial-gradient(circle at top, #0f172a, #020617);
+    color:white;
+    min-height:100vh;
+}
+
+.app-container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+
+.app-header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.app-header h1{
+    font-size:2.5rem;
+    background: linear-gradient(90deg,#22d3ee,#38bdf8,#818cf8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.rate-info{
+    text-align:center;
+    margin-bottom:20px;
+    font-size:1rem;
+    opacity:0.85;
+}
+
+.crypto-table-section{
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-radius:16px;
+    padding:20px;
+    margin-bottom:30px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.crypto-table{
+    width:100%;
+    border-collapse: collapse;
+}
+
+.crypto-table th{
+    text-align:left;
+    padding:12px;
+    font-weight:600;
+    color:#93c5fd;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.crypto-table td{
+    padding:14px 12px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+.crypto-row{
+    transition:0.3s;
+}
+
+.crypto-row:hover{
+    background: rgba(255,255,255,0.04);
+}
+
+.coin-cell{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.coin-icon{
+    width:28px;
+    height:28px;
+}
+
+.positive{
+    color:#22c55e;
+    font-weight:600;
+}
+
+.negative{
+    color:#ef4444;
+    font-weight:600;
+}
+
+.chart-section{
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.chart-section h2{
+    margin-bottom:15px;
+    font-size:1.2rem;
+}
+
+#btcChart{
+    width:100%;
+    height:300px;
+}
+
+.app-footer{
+    text-align:center;
+    margin-top:30px;
+    font-size:0.85rem;
+    opacity:0.6;
+}
+
+@media(max-width:768px){
+    .app-header h1{font-size:1.8rem;}
+    .crypto-table th,.crypto-table td{font-size:0.85rem;}
+}
