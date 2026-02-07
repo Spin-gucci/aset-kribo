@@ -1,145 +1,107 @@
-/* =============================
-   FIXED & REFACTORED VERSION
-   Binance Real API (USDT market)
-   Auto Convert USDT -> IDR
-   Stable WebSocket
-   Production-ready structure
-============================= */
+// ================================
+// Binance Realtime Crypto Dashboard
+// FULL UI CONNECTED VERSION
+// ================================
 
-// ================= CONFIG =================
-const CONFIG = {
-    updateInterval: 15000,
-    defaultFiat: 'IDR',
-    useWebSocket: true
-};
-
-// ================= SYMBOL LIST (REAL BINANCE MARKET) =================
-const CRYPTO_LIST = [
-    { symbol: 'BTC', name: 'Bitcoin', binanceSymbol: 'BTCUSDT', cmcId: 1 },
-    { symbol: 'ETH', name: 'Ethereum', binanceSymbol: 'ETHUSDT', cmcId: 1027 },
-    { symbol: 'BNB', name: 'Binance Coin', binanceSymbol: 'BNBUSDT', cmcId: 1839 },
-    { symbol: 'SOL', name: 'Solana', binanceSymbol: 'SOLUSDT', cmcId: 5426 },
-    { symbol: 'XRP', name: 'Ripple', binanceSymbol: 'XRPUSDT', cmcId: 52 },
-    { symbol: 'ADA', name: 'Cardano', binanceSymbol: 'ADAUSDT', cmcId: 2010 },
-    { symbol: 'DOGE', name: 'Dogecoin', binanceSymbol: 'DOGEUSDT', cmcId: 74 },
-    { symbol: 'DOT', name: 'Polkadot', binanceSymbol: 'DOTUSDT', cmcId: 6636 }
+const symbols = [
+    "btcusdt",
+    "ethusdt",
+    "bnbusdt",
+    "solusdt",
+    "xrpusdt"
 ];
 
-// ================= STATE =================
-const appState = {
-    cryptoData: [],
-    usdtToIdr: 0,
-    ws: null
-};
+const API_24H = "https://api.binance.com/api/v3/ticker/24hr";
+let USDT_IDR = 16000; // default fallback
 
-// ================= UTILS =================
-function formatIDR(num){
-    return `Rp ${Math.round(num).toLocaleString('id-ID')}`;
-}
+const tableBody = document.getElementById("cryptoTable");
+const rateInfo = document.getElementById("rateInfo");
 
-// ================= BINANCE API =================
-class BinanceAPI{
-    constructor(){
-        this.baseURL = 'https://api.binance.com/api/v3';
-        this.wsURL = 'wss://stream.binance.com:9443/ws';
-    }
+let marketData = {};
 
-    async getTicker24hr(symbol){
-        const res = await fetch(`${this.baseURL}/ticker/24hr?symbol=${symbol}`);
-        return res.json();
-    }
-
-    async getKlines(symbol, interval='1h', limit=24){
-        const res = await fetch(`${this.baseURL}/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
-        return res.json();
-    }
-
-    createWebSocket(symbols, callback){
-        const streams = symbols.map(s=>`${s.toLowerCase()}@ticker`).join('/');
-        const ws = new WebSocket(`${this.wsURL}/${streams}`);
-
-        ws.onmessage = e => callback(JSON.parse(e.data));
-        ws.onclose = ()=> setTimeout(()=> this.createWebSocket(symbols, callback), 3000);
-        return ws;
+// ================================
+// Fetch USDT to IDR Rate
+// ================================
+async function fetchRate() {
+    try {
+        const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=IDR");
+        const data = await res.json();
+        USDT_IDR = data.rates.IDR;
+        rateInfo.innerText = `USDT → IDR : ${USDT_IDR.toLocaleString()}`;
+    } catch (e) {
+        rateInfo.innerText = `USDT → IDR : ${USDT_IDR.toLocaleString()} (fallback)`;
     }
 }
 
-// ================= RATE SERVICE =================
-async function getUSDTtoIDR(){
-    const res = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+// ================================
+// Render Table
+// ================================
+function renderTable() {
+    tableBody.innerHTML = "";
+    let i = 1;
+
+    Object.values(marketData).forEach(item => {
+        const priceIDR = (parseFloat(item.c) * USDT_IDR).toLocaleString();
+        const change = parseFloat(item.P);
+
+        const tr = document.createElement("tr");
+        tr.className = "crypto-row";
+
+        tr.innerHTML = `
+            <td>${i++}</td>
+            <td>${item.s.replace("USDT", "")}</td>
+            <td>Rp ${priceIDR}</td>
+            <td class="${change >= 0 ? 'positive' : 'negative'}">${change.toFixed(2)}%</td>
+        `;
+
+        tableBody.appendChild(tr);
+    });
+}
+
+// ================================
+// Initial Data Load
+// ================================
+async function loadInitialData() {
+    const res = await fetch(API_24H);
     const data = await res.json();
-    return data.rates.IDR;
-}
 
-// ================= APP =================
-class CryptoMarketApp{
-    constructor(){
-        this.api = new BinanceAPI();
-        this.init();
-    }
-
-    async init(){
-        appState.usdtToIdr = await getUSDTtoIDR();
-        await this.loadAllData();
-        if(CONFIG.useWebSocket) this.initWS();
-    }
-
-    async loadAllData(){
-        const promises = CRYPTO_LIST.map(c=>this.loadCrypto(c));
-        const data = await Promise.all(promises);
-        appState.cryptoData = data.filter(Boolean);
-        this.render();
-    }
-
-    async loadCrypto(crypto){
-        try{
-            const t = await this.api.getTicker24hr(crypto.binanceSymbol);
-            const k = await this.api.getKlines(crypto.binanceSymbol);
-
-            const priceUSDT = parseFloat(t.lastPrice);
-            const priceIDR = priceUSDT * appState.usdtToIdr;
-
-            return {
-                ...crypto,
-                priceUSDT,
-                priceIDR,
-                change24h: parseFloat(t.priceChangePercent),
-                volumeUSDT: parseFloat(t.quoteVolume),
-                sparkline: k.map(x=>parseFloat(x[4]) * appState.usdtToIdr)
-            }
-        }catch(e){
-            console.error('Load error', crypto.symbol, e);
-            return null;
+    data.forEach(item => {
+        const symbol = item.symbol.toLowerCase();
+        if (symbols.includes(symbol)) {
+            marketData[symbol] = item;
         }
-    }
+    });
 
-    initWS(){
-        const symbols = CRYPTO_LIST.map(c=>c.binanceSymbol);
-        appState.ws = this.api.createWebSocket(symbols, data=>this.onWS(data));
-    }
-
-    onWS(data){
-        const sym = data.s;
-        const coin = appState.cryptoData.find(c=>c.binanceSymbol===sym);
-        if(!coin) return;
-
-        coin.priceUSDT = parseFloat(data.c);
-        coin.priceIDR = coin.priceUSDT * appState.usdtToIdr;
-        coin.change24h = parseFloat(data.P);
-        this.render();
-    }
-
-    render(){
-        console.clear();
-        console.table(appState.cryptoData.map(c=>({
-            Coin: c.symbol,
-            Price_IDR: formatIDR(c.priceIDR),
-            Change: c.change24h+'%'
-        })));
-    }
+    renderTable();
 }
 
-// ================= INIT =================
-document.addEventListener('DOMContentLoaded',()=>{
-    window.app = new CryptoMarketApp();
-});
+// ================================
+// WebSocket Realtime
+// ================================
+function connectWS() {
+    const streams = symbols.map(s => `${s}@ticker`).join("/");
+    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const data = msg.data;
+        const symbol = data.s.toLowerCase();
+
+        if (marketData[symbol]) {
+            marketData[symbol] = data;
+            renderTable();
+        }
+    };
+
+    ws.onclose = () => {
+        console.log("WS reconnecting...");
+        setTimeout(connectWS, 3000);
+    };
+}
+
+// ================================
+// INIT
+// ================================
+fetchRate();
+loadInitialData();
+connectWS();
