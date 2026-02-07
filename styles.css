@@ -454,6 +454,14 @@ body {
     align-items: center;
 }
 
+.chart-info > * {
+    flex: 1;
+}
+
+.chart-info .chart-change {
+    text-align: right;
+}
+
 .chart-crypto {
     display: flex;
     align-items: center;
@@ -719,6 +727,8 @@ body {
     padding: 20px;
     background: var(--bg-secondary);
     border-radius: var(--border-radius);
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 .page-btn {
@@ -1221,8 +1231,13 @@ body {
 
 /* Responsive Design */
 @media (max-width: 1200px) {
+    .container {
+        padding: 0 16px;
+    }
+
     .hero-section {
         grid-template-columns: 1fr;
+        padding: 30px;
     }
     
     .content-grid {
@@ -1232,36 +1247,122 @@ body {
     .sidebar-column {
         order: -1;
     }
+
+    .chart-info {
+        gap: 20px;
+    }
 }
+
 
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;
         gap: 15px;
     }
+
+    .nav-center,
+    .nav-right {
+        width: 100%;
+    }
+
+    .nav-right {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
     
     .nav-menu {
         flex-wrap: wrap;
         justify-content: center;
+        gap: 12px;
+    }
+
+    .nav-menu a {
+        padding: 8px 12px;
     }
     
     .hero-content h1 {
         font-size: 32px;
+    }
+
+    .hero-section {
+        padding: 24px;
+        gap: 24px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        border-radius: 16px;
+        align-items: stretch;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .search-bar i {
+        padding: 0;
+    }
+
+    .search-bar input {
+        padding: 10px 0;
+    }
+
+    .btn-search {
+        width: 100%;
+        padding: 12px 20px;
     }
     
     .hero-stats {
         flex-direction: column;
         gap: 20px;
     }
+
+    .hero-stat {
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+    }
+
+    .chart-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .chart-info .chart-change {
+        text-align: left;
+        width: 100%;
+    }
     
     .table-controls {
         flex-direction: column;
         align-items: flex-start;
     }
+
+    .table-filters {
+        flex-wrap: wrap;
+    }
     
     .controls-right {
         width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .currency-selector,
+    .refresh-btn button {
+        width: 100%;
         justify-content: space-between;
+    }
+
+    .pagination {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-numbers {
+        flex-wrap: wrap;
     }
     
     .footer-bottom .container {
@@ -1269,3 +1370,45 @@ body {
         text-align: center;
     }
 }
+   @media (max-width: 640px) {
+    .container {
+        padding: 0 14px;
+    }
+
+    .main-header {
+        padding: 12px 0;
+    }
+
+    .logo a {
+        font-size: 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 28px;
+    }
+
+    .hero-stat-value {
+        font-size: 20px;
+    }
+
+    .chart-container {
+        height: 180px;
+    }
+
+    .widget-content {
+        padding: 16px;
+    }
+
+    .price-widget {
+        margin-bottom: 30px;
+    }
+
+    .price-stats {
+        margin-bottom: 32px;
+    }
+
+    .order-book-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
